@@ -1,0 +1,28 @@
+Ideas concerning the final version:
+
+1.) As Far as I can tell, there isn't any way to specify a planet radius, we need that
+2.) The subdivision process destroys the old tiles:
+	a.) This is fine during initial generation
+	b.) Once the whole thing is set in motion, a way to control level of detail is useful
+		i.) establish the minimum grid size, lower levels of detail represented by aggregations of tiles
+		 --or--
+		ii.) create a dynamic way to generate finer grids where needed
+		--note--
+		I think the upper is probably more realistic, with individual tile "states" calculable
+		through the summation of effects upon them
+3.) This doesn't only create hexagons, it creates 12 pentagons and then subdivides down,
+	which frankly is expected, and no big deal, maybe even useful as a set of plot hooks
+	with the pentagon centers representing some sort of power center in the world.
+4.) The whole thing is a functional library with structs masquerading as classes, AHHHH!
+	Not the end of the world but why? The whole thing would be easier to wrap in UE4 items
+	if it was a class library instead.
+5.) Pointers Everywhere...
+6.) Also, custom math library, why?
+6.) Curious Question, how does one cheaply calculate the manhattan distance on this grid?
+
+Anyways as previously noted, step one will be to convert the planet generation into a library.
+Steps as follows:
+1.) SphereGrid class all this is the the grid, the terrain and climate maps should take this as a
+	construction argument.
+2.) Next is the overlaying terrain map class
+3.) Finally a Climate Map class
