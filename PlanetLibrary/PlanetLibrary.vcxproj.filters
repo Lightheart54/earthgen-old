@@ -13,5 +13,174 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Climate">
+      <UniqueIdentifier>{40c36b81-686e-49da-b8e3-441fe9248c3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Climate\Header Files">
+      <UniqueIdentifier>{1c6ee990-8dd6-407a-85d7-f8e92a828ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Climate\Source Files">
+      <UniqueIdentifier>{252b90f5-5955-4cfd-aab9-472d30af4f62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain">
+      <UniqueIdentifier>{9e72c2e9-34ee-4f56-8880-6e5b375c6a63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain\Header Files">
+      <UniqueIdentifier>{6edfbbb4-fd64-4a30-9a85-570c8d4b8024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain\Source Files">
+      <UniqueIdentifier>{ffcd8408-1bfc-42a7-b8cb-0582521d5b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid">
+      <UniqueIdentifier>{53c8b167-1698-4a7b-b675-720125ee6d1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid\Header Files">
+      <UniqueIdentifier>{c105ca1c-298a-4cbb-bb54-09a190206593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Grid\Source Files">
+      <UniqueIdentifier>{39bff8a4-7a8a-45c4-b4c9-2863d9cabc47}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\planet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate_corner.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate_edge.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate_generation.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate_tile.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\climate_variables.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain_variables.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain_corner.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain_edge.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain_generation.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\terrain_tile.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\terrain\river.cpp">
+      <Filter>Terrain\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\climate\season.cpp">
+      <Filter>Climate\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\grid\corner.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\grid\create_grid.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\grid\edge.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\grid\grid.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\grid\tile.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\planet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_variables.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_corner.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_edge.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_generation.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_generation_season.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_parameters.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\climate_tile.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_water.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_corner.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_edge.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_generation.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_parameters.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_tile.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\terrain_variables.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\terrain\river.h">
+      <Filter>Terrain\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\wind.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\season_variables.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\climate\season.h">
+      <Filter>Climate\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\corner.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\tile.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\grid.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\create_grid.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\edge.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
