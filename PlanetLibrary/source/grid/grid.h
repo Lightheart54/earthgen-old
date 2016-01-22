@@ -1,39 +1,42 @@
 #ifndef grid_h
 #define grid_h
 
-#include <deque>
+#include <map>
 #include "tile.h"
 #include "corner.h"
 #include "edge.h"
-#include "create_grid.h"
-class Planet;
 
-class Grid {
-public:
-	Grid (int);
-	
-	int size;
-	std::deque<Tile> tiles;
-	std::deque<Corner> corners;
-	std::deque<Edge> edges;
+class Grid
+{
+	static Grid createGridWithEdgeLength(const double& _radius, const double& desiredTileArea);
+	Grid(const double& _radius, const unsigned int& numSubdivisions);
+	~Grid();
+
+	TilePtr getClosestTile(const PosVector& vec) const;
+	EdgePtr getClosestEdge(const PosVector& vec) const;
+	CornerPtr getClosestCorner(const PosVector& vec) const;
+
+	TilePtrList getTiles() const;
+	EdgePtrList getEdges() const;
+	CornerPtrList getCorners() const;
+	double getRadius() const;
+
+protected:
+	void subdivideGrid();
+	void createBaseGrid();
+	EdgePtr createEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
+	TilePtr createTile(const PosVector& pos, const EdgePtrList edgeLoop);
+	TilePtr createTileFromSubdivision(const CornerPtr& baseCorner);
+	void registerTileWithEdges(const TilePtr& tileptr);
+	TilePtr createTile(const std::vector<PosVector>& cornerPoints);
+	EdgePtrList createEdgeLoop(const std::vector<PosVector>& cornerPoints);
+
+	double radius;
+
+	TileMap tiles;
+	CornerMap corners;
+	EdgeMap edges;
 };
 
-const std::deque<Tile>& tiles (const Planet&);
-const std::deque<Corner>& corners (const Planet&);
-const std::deque<Edge>& edges (const Planet&);
-
-const Tile* nth_tile (const Planet&, int);
-const Corner* nth_corner (const Planet&, int);
-const Edge* nth_edge (const Planet&, int);
-
-int tile_count (const Planet&);
-int corner_count (const Planet&);
-int edge_count (const Planet&);
-
-int tile_count (int size);
-int corner_count (int size);
-int edge_count (int size);
-
-void set_grid_size (Planet&, int);
 
 #endif

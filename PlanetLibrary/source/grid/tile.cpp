@@ -1,86 +1,112 @@
+#pragma warning(disable:4996)
 #include "tile.h"
 #include "corner.h"
-#include "../../math/math_common.h"
+#include "edge.h"
+#include "StateBase.h"
 
-Tile::Tile (int i, int e) :
-	id (i), edge_count (e) {
-	tiles.resize(edge_count, nullptr);
-	corners.resize(edge_count, nullptr);
-	edges.resize(edge_count, nullptr);
+Tile::Tile(const PosVector& tilePosition, const EdgePtrList& tileEdges)
+	: position(tilePosition)
+{
+	std::transform(tileEdges.begin(), tileEdges.end(), std::back_inserter(edges),
+		[](const EdgePtr& cPtr)->EdgeWPtr { return EdgeWPtr(cPtr); });
 }
 
-int position (const Tile& t, const Tile* n) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.tiles[i] == n)
-			return i;
-	return -1;
-}
-
-int position (const Tile& t, const Corner* c) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.corners[i] == c)
-			return i;
-	return -1;
-}
-
-int position (const Tile& t, const Edge* e) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.edges[i] == e)
-			return i;
-	return -1;
-}
-
-int id (const Tile& t) {return t.id;}
-int edge_count (const Tile& t) {return t.edge_count;}
-const Vector3& vector (const Tile& t) {return t.v;}
-const std::vector<const Tile*>& tiles (const Tile& t) {return t.tiles;}
-const std::vector<const Corner*>& corners (const Tile& t) {return t.corners;}
-const std::vector<const Edge*>& edges (const Tile& t) {return t.edges;}
-
-const Tile* nth_tile (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.tiles[k];
-}
-
-const Corner* nth_corner (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.corners[k];
-}
-
-const Edge* nth_edge (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.edges[k];
-}
-
-Quaternion reference_rotation (const Tile* t, Quaternion d) {
-	Vector3 v = d * vector(t);
-	Quaternion h = Quaternion();
-	if (v.x != 0 || v.y != 0) {
-		if (v.y != 0) h = Quaternion(normal(Vector3(v.x, v.y, 0)), Vector3(-1,0,0));
-		else if (v.x > 0) h = Quaternion(Vector3(0,0,1), pi);
+TilePtr Tile::createOnSubdividedGrid(const CornerPtr& baseCorner)
+{
+	PosVector myPos = baseCorner->getPosition();
+	EdgePtrList cornerEdges = baseCorner->getEdges();
+	CornerPtrList myCorners;
+	EdgePtrList myEdges;
+	for (const EdgePtr& edge : cornerEdges)
+	{
+		CornerPtrList edgeCorners = edge->getEndPoints();
+		if (edgeCorners.front() == baseCorner)
+		{
+			myCorners.push_back(edgeCorners.back());
+		}
+		else
+		{
+			myCorners.push_back(edgeCorners.front());
+		}
+		myCorners.push_back(nullptr);
 	}
-	Quaternion q = Quaternion();
-	if (v.x == 0 && v.y == 0) {
-		if (v.z < 0) q = Quaternion(Vector3(1,0,0), pi);
+	
+	for (size_t i = 0; i < 6; i++)
+	{
+		if ((i+1) % 2 == 1)
+		{
+			size_t next_corner = i < 5 ? i : 0;
+			myCorners[i + 1] = myCorners[i]->getConnectingCorners(myCorners[next_corner]).front();
+		}
+		size_t next_corner = i == 5 ? 0 : i + 1;
+		myEdges.push_back(myCorners[i]->getConnectingEdge(myCorners[next_corner]));
 	}
-	else {
-		q = Quaternion(h*v, Vector3(0,0,1));
+
+	//test to see if the resulting edge loop is in the same direction as the position vector
+	PosVector vec1 = myCorners[1]->getPosition() - myCorners[0]->getPosition();
+	PosVector vec2 = myCorners[2]->getPosition() - myCorners[1]->getPosition();
+	PosVector xProd = cross_product(vec1, vec2);
+	double dotProd = boost::numeric::ublas::inner_prod(xProd, myPos);
+	if (dotProd < 0)
+	{
+		// it its not reverse the vectors
+		std::reverse(myCorners.begin(), myCorners.end());
+		std::reverse(myEdges.begin(), myEdges.end());
 	}
-	return q*h*d;
+	return std::make_shared<Tile>(myPos, myEdges);
 }
 
-std::vector<Vector2> polygon (const Tile* t, Quaternion d) {
-	std::vector<Vector2> p;
-	Quaternion q = reference_rotation(t, d);
-	for (int i=0; i<edge_count(t); i++) {
-		Vector3 c = q * vector(nth_corner(t, i));
-		p.push_back(Vector2(c.x, c.y));
+Tile::~Tile()
+{
+}
+
+TilePtrList Tile::getNeighbors() const
+{
+	TilePtrList neighbors;
+	for (const EdgeWPtr& edge : edges)
+	{
+		TilePtrList edgeTiles = edge.lock()->getTiles();
+		if (edgeTiles.front().get() == this)
+		{
+			neighbors.push_back(edgeTiles.back());
+		}
+		else
+		{
+			neighbors.push_back(edgeTiles.front());
+		}
 	}
-	return p;
+
+	return neighbors;
+}
+
+EdgePtrList Tile::getEdges() const
+{
+	return lockList(edges);
+}
+
+PosVector Tile::getPosition() const
+{
+	return position;
+}
+
+TileState * Tile::getState(const std::string & stateName) const
+{
+	if (tileStates.find(stateName)==tileStates.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return tileStates.at(stateName);
+	}
+}
+
+bool Tile::addState(TileState * tileState)
+{
+	if (tileStates.find(tileState->getStateName()) == tileStates.end())
+	{
+		tileStates.insert(std::make_pair(tileState->getStateName(), tileState));
+		return true;
+	}
+	return false;
 }

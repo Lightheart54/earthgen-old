@@ -15,7 +15,7 @@ Grid* size_n_grid (int size) {
 
 Grid* size_0_grid () {
 	Grid* grid = new Grid(0);
-	float x = -0.525731112119133606;
+	float x = -0.525731112119133606; //
 	float z = -0.850650808352039932;
 	
 	Vector3 icos_tiles[12] = {

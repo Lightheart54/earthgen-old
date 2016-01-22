@@ -1,49 +1,54 @@
+#pragma warning(disable:4996)
 #include "edge.h"
+#include "tile.h"
+#include "corner.h"
+#include <initializer_list>
 
-Edge::Edge (int i) :
-	id (i) {
-	for (auto& t : tiles)
-		t = nullptr;
-	for (auto& c : corners)
-		c = nullptr;
-}
+Edge::Edge(CornerPtr startPoint, CornerPtr endPoint)
+{
+	corners = { startPoint,endPoint};
+	PosVector spPos = startPoint->getPosition();
+	PosVector epPos = endPoint->getPosition();
+	double mag = boost::numeric::ublas::inner_prod(spPos, spPos);
 
-int position (const Edge& e, const Tile* t) {
-	if (e.tiles[0] == t)
-		return 0;
-	else if (e.tiles[1] == t)
-		return 1;
-	return -1;
-}
-int position (const Edge& e, const Corner* c) {
-	if (e.corners[0] == c)
-		return 0;
-	else if (e.corners[1] == c)
-		return 1;
-	return -1;
+	position = (spPos + epPos);
+	double averageMag = boost::numeric::ublas::inner_prod(spPos, spPos);
+	position *= mag / averageMag;
 }
 
-int sign (const Edge& e, const Tile* t) {
-	if (e.tiles[0] == t)
-		return 1;
-	else if (e.tiles[1] == t)
-		return -1;
-	return 0;
-}
-int sign (const Edge& e, const Corner* c) {
-	if (e.corners[0] == c)
-		return 1;
-	else if (e.corners[1] == c)
-		return -1;
-	return 0;
+TilePtrList Edge::getTiles() const
+{
+	return lockList(tiles);
 }
 
-int id (const Edge& e) {return e.id;}
-const std::array<const Tile*, 2>& tiles (const Edge& e) {return e.tiles;}
-const std::array<const Corner*, 2>& corners (const Edge& e) {return e.corners;}
-const Tile* nth_tile (const Edge& e, int i) {
-	return e.tiles[i];
+CornerPtrList Edge::getEndPoints() const
+{
+	return lockList(corners);
 }
-const Corner* nth_corner (const Edge& e, int i) {
-	return e.corners[i];
+
+PosVector Edge::getPosition() const
+{
+	return position;
+}
+
+EdgeState * Edge::getState(const std::string & stateName) const
+{
+	if (edgeStates.find(stateName) == edgeStates.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return edgeStates.at(stateName);
+	}
+}
+
+bool Edge::addState(EdgeState * edgeState)
+{
+	if (edgeStates.find(edgeState->getStateName()) == edgeStates.end())
+	{
+		edgeStates.insert(std::make_pair(edgeState->getStateName(),edgeState));
+		return true;
+	}
+	return false;
 }

@@ -2,53 +2,39 @@
 #define tile_h
 
 #include <vector>
-#include "../../math/vector2.h"
-#include "../../math/vector3.h"
-#include "../../math/quaternion.h"
-class Corner;
-class Edge;
+#include <unordered_map>
+#include "PositionVector.h"
+#include "StateBase.h"
 
 class Tile {
 public:
-	Tile (int id, int edge_count);
+	//!Base Constructor
+	//! \param[in] create a tile with a given position vector
+	//! \param[in] cornerList the list of corners to make the tile from
+	Tile (const PosVector& tilePosition, const EdgePtrList& tileEdges);
+
+	//!Subdivision Constructor creates a tile from an existing corner point
+	//! \param[in] baseCorner the corner point to create the subdivision side from
+	static TilePtr createOnSubdividedGrid(const CornerPtr& baseCorner);
+
+	~Tile();
+
+	TilePtrList getNeighbors() const;
+	EdgePtrList getEdges() const;
+	CornerPtrList getCorners() const;
+	PosVector getPosition() const;
+	TileState* getState(const std::string& stateName) const;
+	bool addState(TileState* tileState);
+
+protected:
+	friend class Grid;
+
+	std::unordered_map<std::string,TileState*> tileStates;
 	
-	int id;
-	int edge_count;
-	Vector3 v;
-	std::vector<const Tile*> tiles;
-	std::vector<const Corner*> corners;
-	std::vector<const Edge*> edges;
+	PosVector position;
+	CornerWPtrList corners;
+	EdgeWPtrList edges;
 };
 
-int id (const Tile&);
-int edge_count (const Tile&);
-const Vector3& vector (const Tile&);
-const std::vector<const Tile*>& tiles (const Tile&);
-const std::vector<const Corner*>& corners (const Tile&);
-const std::vector<const Edge*>& edges (const Tile&);
-const Tile* nth_tile (const Tile&, int);
-const Corner* nth_corner (const Tile&, int);
-const Edge* nth_edge (const Tile&, int);
-
-int position (const Tile&, const Tile*);
-int position (const Tile&, const Corner*);
-int position (const Tile&, const Edge*);
-
-Quaternion reference_rotation (const Tile*, Quaternion);
-std::vector<Vector2> polygon (const Tile*, Quaternion);
-
-inline int id (const Tile* t) {return id(*t);}
-inline int edge_count (const Tile* t) {return edge_count(*t);}
-inline const Vector3& vector (const Tile* t) {return vector(*t);}
-inline const std::vector<const Tile*>& tiles (const Tile* t) {return tiles(*t);}
-inline const std::vector<const Corner*>& corners (const Tile* t) {return corners(*t);}
-inline const std::vector<const Edge*>& edges (const Tile* t) {return edges(*t);}
-inline const Tile* nth_tile (const Tile* t, int n) {return nth_tile(*t, n);}
-inline const Corner* nth_corner (const Tile* t, int n) {return nth_corner(*t, n);}
-inline const Edge* nth_edge (const Tile* t, int n) {return nth_edge(*t, n);}
-
-inline int position (const Tile* t, const Tile* n) {return position(*t, n);}
-inline int position (const Tile* t, const Corner* c) {return position(*t, c);}
-inline int position (const Tile* t, const Edge* e) {return position(*t, e);}
 
 #endif
