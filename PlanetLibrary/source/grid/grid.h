@@ -26,11 +26,13 @@ protected:
 	void createBaseGrid();
 	CornerPtr createCorner(const PosVector& pos);
 	EdgePtr createEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
-	TilePtr createTile(const PosVector& pos, const EdgePtrList edgeLoop);
-	TilePtr createTileFromSubdivision(const CornerPtr& baseCorner);
+	EdgePtr createAndRegisterEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
+	TilePtr createTile(const EdgePtrList& edgeLoop);
 	void registerTileWithEdges(const TilePtr& tileptr);
 	TilePtr createTile(const std::vector<PosVector>& cornerPoints);
+	TilePtr createTile(const CornerPtrList& cornerPoints);
 	EdgePtrList createEdgeLoop(const std::vector<PosVector>& cornerPoints);
+	EdgePtrList createEdgeLoop(CornerPtrList cornerPoints);
 
 	double radius;
 

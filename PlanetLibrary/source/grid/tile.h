@@ -11,12 +11,8 @@ public:
 	//!Base Constructor
 	//! \param[in] create a tile with a given position vector
 	//! \param[in] cornerList the list of corners to make the tile from
-	Tile (const PosVector& tilePosition, const EdgePtrList& tileEdges);
-
-	//!Subdivision Constructor creates a tile from an existing corner point
-	//! \param[in] baseCorner the corner point to create the subdivision side from
-	static TilePtr createOnSubdividedGrid(const CornerPtr& baseCorner);
-
+	Tile (const EdgePtrList& tileEdges);
+	
 	~Tile();
 
 	TilePtrList getNeighbors() const;
@@ -32,7 +28,6 @@ protected:
 	std::unordered_map<std::string,TileState*> tileStates;
 	
 	PosVector position;
-	CornerWPtrList corners;
 	EdgeWPtrList edges;
 };
 
