@@ -10,7 +10,7 @@ Edge::Edge(CornerPtr startPoint, CornerPtr endPoint)
 	PosVector spPos = startPoint->getPosition();
 	PosVector epPos = endPoint->getPosition();
 	double mag = std::sqrt(boost::numeric::ublas::inner_prod(spPos, spPos));
-	position = getAveragedVectorOnSphere({ spPos,epPos }, mag);
+	position = getAveragedVector({ spPos,epPos });
 }
 
 TilePtrList Edge::getTiles() const

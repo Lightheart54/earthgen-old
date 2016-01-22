@@ -13,6 +13,7 @@ PosVector cross_product(const PosVector& lhs, const PosVector& rhs);
 PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double& radius);
 PosVector getAveragedVector(const std::vector<PosVector>& vectors);
 
+template <int percision = 2>
 struct VecHash
 {
 	double cantorPair(const PosVector& key) const
@@ -41,7 +42,7 @@ struct VecHash
 			_cantorPair *= maxSize / (0.5*(360 + 180)*(360 + 180 + 1) + 180);
 		}
 
-		return size_t(std::ceil(_cantorPair *100));
+		return size_t(std::ceil(_cantorPair * std::pow(10,percision)));
 	}
 };
 
@@ -49,8 +50,23 @@ struct VecCompare
 {
 	bool operator()(const PosVector& lhs, const PosVector& rhs) const
 	{
-		VecHash hasher;
+		VecHash<2> hasher;
 		return hasher.cantorPair(lhs) < hasher.cantorPair(rhs);
+	}
+};
+
+template<int percision = 2>
+struct VecEquals
+{
+	unsigned int roundInt = unsigned int(std::pow(10, percision));
+	bool operator()(const PosVector& lhs, const PosVector& rhs) const
+	{
+		bool equals = lhs.size() == rhs.size();
+		for (size_t i = 0; i < lhs.size() && equals; i++)
+		{
+			equals = equals && int(std::round(lhs[i] * roundInt)) == int(std::round(rhs[i] * roundInt));
+		}
+		return equals;
 	}
 };
 
@@ -83,9 +99,9 @@ typedef std::weak_ptr<Corner> CornerWPtr;
 typedef std::vector<CornerPtr> CornerPtrList;
 typedef std::vector<CornerWPtr> CornerWPtrList;
 
-typedef std::unordered_map<PosVector, TilePtr, VecHash> TileUMap;
-typedef std::unordered_map<PosVector, EdgePtr, VecHash> EdgeUMap;
-typedef std::unordered_map<PosVector, CornerPtr, VecHash> CornerUMap;
+typedef std::unordered_map<PosVector, TilePtr, VecHash<2>,VecEquals<2>> TileUMap;
+typedef std::unordered_map<PosVector, EdgePtr, VecHash<2>, VecEquals<2>> EdgeUMap;
+typedef std::unordered_map<PosVector, CornerPtr, VecHash<2>, VecEquals<2>> CornerUMap;
 
 typedef std::map<PosVector, TilePtr, VecCompare> TileMap;
 typedef std::map<PosVector, EdgePtr, VecCompare> EdgeMap;

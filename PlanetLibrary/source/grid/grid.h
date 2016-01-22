@@ -12,9 +12,9 @@ class Grid
 	Grid(const double& _radius, const unsigned int& numSubdivisions);
 	~Grid();
 
-	TilePtr getClosestTile(const PosVector& vec) const;
-	EdgePtr getClosestEdge(const PosVector& vec) const;
-	CornerPtr getClosestCorner(const PosVector& vec) const;
+	TilePtr getTile(const PosVector& vec) const;
+	EdgePtr getEdge(const PosVector& vec) const;
+	CornerPtr getCorner(const PosVector& vec) const;
 
 	TilePtrList getTiles() const;
 	EdgePtrList getEdges() const;
@@ -24,6 +24,7 @@ class Grid
 protected:
 	void subdivideGrid();
 	void createBaseGrid();
+	CornerPtr createCorner(const PosVector& pos);
 	EdgePtr createEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
 	TilePtr createTile(const PosVector& pos, const EdgePtrList edgeLoop);
 	TilePtr createTileFromSubdivision(const CornerPtr& baseCorner);
@@ -33,9 +34,9 @@ protected:
 
 	double radius;
 
-	TileMap tiles;
-	CornerMap corners;
-	EdgeMap edges;
+	TileUMap tiles;
+	CornerUMap corners;
+	EdgeUMap edges;
 };
 
 

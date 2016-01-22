@@ -6,7 +6,7 @@ typename _MapType::mapped_type mapLookup(const _MapType& map,
 	const typename _MapType::key_type& key,
 	typename _MapType::mapped_type notFoundValue)
 {
-	_MapType::const_iterator mapIt = map.lower_bound(key);
+	_MapType::const_iterator mapIt = map.find(key);
 	if (mapIt != map.end())
 	{
 		return (*mapIt).second;
@@ -54,17 +54,17 @@ Grid::~Grid()
 {
 }
 
-TilePtr Grid::getClosestTile(const PosVector& vec) const
+TilePtr Grid::getTile(const PosVector& vec) const
 {
 	return mapLookup(tiles, vec, nullptr);
 }
 
-EdgePtr Grid::getClosestEdge(const PosVector& vec) const
+EdgePtr Grid::getEdge(const PosVector& vec) const
 {
 	return mapLookup(edges, vec, nullptr);
 }
 
-CornerPtr Grid::getClosestCorner(const PosVector& vec) const
+CornerPtr Grid::getCorner(const PosVector& vec) const
 {
 	return mapLookup(corners, vec, nullptr);
 }
@@ -91,6 +91,29 @@ double Grid::getRadius() const
 
 void Grid::subdivideGrid()
 {
+	TileUMap oldTiles = tiles;
+	EdgeUMap oldEdges = edges;
+	CornerUMap oldCorners = corners;
+	tiles.clear();
+	edges.clear();
+	corners.clear();
+
+	for (const TileMap::value_type& tilePair : oldTiles)
+	{
+		//start by making a temporary corner in the middle of each of the existing tiles
+		//for book keeping purposes
+		CornerPtr tileCenter = createCorner(tilePair.first);
+	}
+	CornerUMap oldTileCorners = corners;
+	corners.clear();
+
+	//now we take every edge we have and subdivide it
+	for (const EdgeMap::value_type& EdgePair : oldEdges)
+	{
+		CornerPtr edgeCenter = createCorner(EdgePair.first);
+		//the new edges must have a length of sqrt(3) * the old edge length
+	}
+
 }
 
 void Grid::createBaseGrid()
@@ -146,7 +169,7 @@ void Grid::createBaseGrid()
 
 	for (const PosVector& pVec : vertexPos)
 	{
-		corners.insert({ pVec,std::make_shared<Corner>(pVec) });
+		createCorner(pVec);
 	}
 	createTile({ vertexPos[0],	vertexPos[16],	vertexPos[2],	vertexPos[13],	vertexPos[12] });
 	createTile({ vertexPos[1],	vertexPos[12],	vertexPos[13],	vertexPos[3],	vertexPos[18] });
@@ -160,6 +183,13 @@ void Grid::createBaseGrid()
 	createTile({ vertexPos[7],	vertexPos[19],	vertexPos[18],	vertexPos[3],	vertexPos[11] });
 	createTile({ vertexPos[5],	vertexPos[19],	vertexPos[7],	vertexPos[15],	vertexPos[14] });
 	createTile({ vertexPos[4],	vertexPos[14],	vertexPos[15],	vertexPos[6],	vertexPos[17] });
+}
+
+CornerPtr Grid::createCorner(const PosVector & pos)
+{
+	CornerPtr newCorner = std::make_shared<Corner>(pos);
+	corners.insert({ pos, newCorner });
+	return newCorner;
 }
 
 EdgePtr Grid::createEdge(const CornerPtr & startPoint, const CornerPtr & endPoint)
@@ -207,7 +237,7 @@ EdgePtrList Grid::createEdgeLoop(const std::vector<PosVector>& cornerPoints)
 	for (size_t i = 0; i < cornerPoints.size(); i++)
 	{
 		size_t nextPoint = i < cornerPoints.size() - 1 ? i + 1 : 0;
-		edgeloop.push_back(createEdge(getClosestCorner(cornerPoints[i]), getClosestCorner(cornerPoints[i])));
+		edgeloop.push_back(createEdge(getCorner(cornerPoints[i]), getCorner(cornerPoints[i])));
 	}
 	return edgeloop;
 }
