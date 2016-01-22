@@ -17,7 +17,7 @@ PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const
 	{
 		averageVec += vector;
 	}
-	double averageMag = boost::numeric::ublas::inner_prod(averageVec, averageVec);
+	double averageMag = std::sqrt(boost::numeric::ublas::inner_prod(averageVec, averageVec));
 	averageVec *= radius / averageMag;
 	return averageVec;
 }
