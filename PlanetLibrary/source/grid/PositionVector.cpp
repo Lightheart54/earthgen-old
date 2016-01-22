@@ -12,12 +12,19 @@ PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
 
 PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double & radius)
 {
+	PosVector averageVec = getAveragedVector(vectors);
+	double averageMag = std::sqrt(boost::numeric::ublas::inner_prod(averageVec, averageVec));
+	averageVec *= radius / averageMag;
+	return averageVec;
+}
+
+PosVector getAveragedVector(const std::vector<PosVector>& vectors)
+{
 	PosVector averageVec(3, 0.0);
 	for (const PosVector& vector : vectors)
 	{
 		averageVec += vector;
 	}
-	double averageMag = std::sqrt(boost::numeric::ublas::inner_prod(averageVec, averageVec));
-	averageVec *= radius / averageMag;
+	averageVec /= vectors.size();
 	return averageVec;
 }

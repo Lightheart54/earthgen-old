@@ -11,6 +11,7 @@ typedef boost::numeric::ublas::vector<double> PosVector;
 PosVector cross_product(const PosVector& lhs, const PosVector& rhs);
 
 PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double& radius);
+PosVector getAveragedVector(const std::vector<PosVector>& vectors);
 
 struct VecHash
 {
