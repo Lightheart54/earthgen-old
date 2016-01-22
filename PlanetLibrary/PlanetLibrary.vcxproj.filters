@@ -191,5 +191,8 @@
     <ClInclude Include="source\grid\StateBase.h">
       <Filter>Grid\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\PlanetLibraryExports.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

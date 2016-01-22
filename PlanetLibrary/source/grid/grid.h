@@ -1,14 +1,15 @@
 #ifndef grid_h
 #define grid_h
 
+#include "../PlanetLibraryExports.h"
 #include <map>
 #include "tile.h"
 #include "corner.h"
 #include "edge.h"
 
-class Grid
+class PLANET_LIB_API Grid
 {
-	static Grid createGridWithEdgeLength(const double& _radius, const double& desiredTileArea);
+	static Grid createGridWithTileArea(const double& _radius, const double& desiredTileArea);
 	Grid(const double& _radius, const unsigned int& numSubdivisions);
 	~Grid();
 

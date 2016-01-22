@@ -1,10 +1,11 @@
 #ifndef corner_h
 #define corner_h
 
+#include "../PlanetLibraryExports.h"
 #include <vector>
 #include "PositionVector.h"
 
-class Corner {
+class PLANET_LIB_API Corner {
 public:
 	Corner (const PosVector& _position);
 	

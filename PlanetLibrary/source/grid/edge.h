@@ -1,12 +1,13 @@
 #ifndef edge_h
 #define edge_h
 
+#include "../PlanetLibraryExports.h"
 #include <vector>
 #include <unordered_map>
 #include "PositionVector.h"
 #include "StateBase.h"
 
-class Edge {
+class PLANET_LIB_API Edge {
 	public:
 		Edge (CornerPtr startPoint, CornerPtr endPoint);
 

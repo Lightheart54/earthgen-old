@@ -1,7 +1,7 @@
 #pragma warning(disable:4996)
 #include "PositionVector.h"
 
-PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
+PLANET_LIB_API PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
 {
 	PosVector result(3);
 	result[0] = lhs[2] * rhs[3] - lhs[3] * rhs[2];
@@ -10,7 +10,7 @@ PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
 	return result;
 }
 
-PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double & radius)
+PLANET_LIB_API PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double & radius)
 {
 	PosVector averageVec = getAveragedVector(vectors);
 	double averageMag = std::sqrt(boost::numeric::ublas::inner_prod(averageVec, averageVec));
@@ -18,7 +18,7 @@ PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const
 	return averageVec;
 }
 
-PosVector getAveragedVector(const std::vector<PosVector>& vectors)
+PLANET_LIB_API PosVector getAveragedVector(const std::vector<PosVector>& vectors)
 {
 	PosVector averageVec(3, 0.0);
 	for (const PosVector& vector : vectors)

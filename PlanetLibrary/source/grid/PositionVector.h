@@ -1,4 +1,6 @@
 #pragma once
+
+#include "../PlanetLibraryExports.h"
 #include "boost/numeric/ublas/vector.hpp"
 #include <unordered_map>
 #include <map>
@@ -8,10 +10,10 @@
 
 typedef boost::numeric::ublas::vector<double> PosVector;
 
-PosVector cross_product(const PosVector& lhs, const PosVector& rhs);
+PLANET_LIB_API PosVector cross_product(const PosVector& lhs, const PosVector& rhs);
 
-PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double& radius);
-PosVector getAveragedVector(const std::vector<PosVector>& vectors);
+PLANET_LIB_API PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double& radius);
+PLANET_LIB_API PosVector getAveragedVector(const std::vector<PosVector>& vectors);
 
 template <int percision = 2>
 struct VecHash
@@ -46,11 +48,12 @@ struct VecHash
 	}
 };
 
+template <int percision = 2>
 struct VecCompare
 {
 	bool operator()(const PosVector& lhs, const PosVector& rhs) const
 	{
-		VecHash<2> hasher;
+		VecHash<percision> hasher;
 		return hasher.cantorPair(lhs) < hasher.cantorPair(rhs);
 	}
 };
@@ -103,6 +106,6 @@ typedef std::unordered_map<PosVector, TilePtr, VecHash<2>,VecEquals<2>> TileUMap
 typedef std::unordered_map<PosVector, EdgePtr, VecHash<2>, VecEquals<2>> EdgeUMap;
 typedef std::unordered_map<PosVector, CornerPtr, VecHash<2>, VecEquals<2>> CornerUMap;
 
-typedef std::map<PosVector, TilePtr, VecCompare> TileMap;
-typedef std::map<PosVector, EdgePtr, VecCompare> EdgeMap;
-typedef std::map<PosVector, CornerPtr, VecCompare> CornerMap;
+typedef std::map<PosVector, TilePtr, VecCompare<2>> TileMap;
+typedef std::map<PosVector, EdgePtr, VecCompare<2>> EdgeMap;
+typedef std::map<PosVector, CornerPtr, VecCompare<2>> CornerMap;

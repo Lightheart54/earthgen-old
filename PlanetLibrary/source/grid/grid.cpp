@@ -26,7 +26,7 @@ std::vector<typename _MapType::mapped_type> getMapValues(const _MapType& map)
 	return values;
 }
 
-Grid Grid::createGridWithEdgeLength(const double & _radius, const double & desiredTileArea)
+Grid Grid::createGridWithTileArea(const double & _radius, const double & desiredTileArea)
 {
 	double sphereSurfaceArea = 4 * PI * _radius*_radius;
 	double numberOfTiles = sphereSurfaceArea / desiredTileArea;

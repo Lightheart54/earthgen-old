@@ -1,12 +1,13 @@
 #ifndef tile_h
 #define tile_h
 
+#include "../PlanetLibraryExports.h"
 #include <vector>
 #include <unordered_map>
 #include "PositionVector.h"
 #include "StateBase.h"
 
-class Tile {
+class PLANET_LIB_API Tile {
 public:
 	//!Base Constructor
 	//! \param[in] create a tile with a given position vector
