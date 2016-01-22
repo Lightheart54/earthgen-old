@@ -170,29 +170,29 @@
     <ClInclude Include="source\climate\season.h">
       <Filter>Climate\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\grid\corner.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\grid\tile.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\grid\grid.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="source\grid\create_grid.h">
       <Filter>Grid\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\grid\edge.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\grid\PositionVector.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\grid\StateBase.h">
-      <Filter>Grid\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="source\PlanetLibraryExports.h">
+    <ClInclude Include="include\PlanetLibraryExports.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\corner.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\edge.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\grid.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\PositionVector.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\StateBase.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\grid\tile.h">
+      <Filter>Grid\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

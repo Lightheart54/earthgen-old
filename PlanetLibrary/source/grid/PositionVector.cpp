@@ -1,5 +1,5 @@
 #pragma warning(disable:4996)
-#include "PositionVector.h"
+#include "grid/PositionVector.h"
 
 PLANET_LIB_API PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
 {

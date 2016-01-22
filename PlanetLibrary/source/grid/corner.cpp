@@ -1,7 +1,7 @@
 #pragma warning(disable:4996)
-#include "corner.h"
-#include "tile.h"
-#include "edge.h"
+#include "grid/corner.h"
+#include "grid/tile.h"
+#include "grid/edge.h"
 
 Corner::Corner(const PosVector & _position):position(_position)
 {

@@ -1,8 +1,8 @@
 #pragma warning(disable:4996)
-#include "tile.h"
-#include "corner.h"
-#include "edge.h"
-#include "StateBase.h"
+#include "grid/tile.h"
+#include "grid/corner.h"
+#include "grid/edge.h"
+#include "grid/StateBase.h"
 
 Tile::Tile(const EdgePtrList& tileEdges)
 {

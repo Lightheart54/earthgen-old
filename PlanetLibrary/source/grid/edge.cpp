@@ -1,7 +1,7 @@
 #pragma warning(disable:4996)
-#include "edge.h"
-#include "tile.h"
-#include "corner.h"
+#include "grid/edge.h"
+#include "grid/tile.h"
+#include "grid/corner.h"
 #include <initializer_list>
 
 Edge::Edge(CornerPtr startPoint, CornerPtr endPoint)

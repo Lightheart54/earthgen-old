@@ -1,5 +1,5 @@
 #pragma warning(disable:4996)
-#include "grid.h"
+#include "grid/grid.h"
 
 template <typename _MapType>
 typename _MapType::mapped_type mapLookup(const _MapType& map,
