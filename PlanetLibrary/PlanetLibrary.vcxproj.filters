@@ -102,6 +102,9 @@
     <ClCompile Include="source\grid\tile.cpp">
       <Filter>Grid\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\grid\PositionVector.cpp">
+      <Filter>Grid\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\planet.h">
@@ -180,6 +183,12 @@
       <Filter>Grid\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\grid\edge.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\PositionVector.h">
+      <Filter>Grid\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\grid\StateBase.h">
       <Filter>Grid\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
