@@ -9,6 +9,7 @@
 
 class PLANET_LIB_API Grid
 {
+public:
 	static Grid createGridWithTileArea(const double& _radius, const double& desiredTileArea);
 	Grid(const double& _radius, const unsigned int& numSubdivisions);
 	~Grid();
