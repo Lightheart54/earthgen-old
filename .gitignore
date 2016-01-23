@@ -13,6 +13,8 @@ Makefile
 # Debug and Release directories (created under Windows, not Linux)
 debug/
 release/
+PlanetLibrary/lib/
+PlanetLibrary/.vs/
 
 # .log files (usually created by QtTest - thanks to VestniK)
 *.log
@@ -21,6 +23,8 @@ release/
 # NOTE: PROJECT is a your project's name, analog of PROJECT.exe in Linux
 *.exe
 *.dll
+*.lib
+*.pdb
 PROJECT
 
 # Windows-specific files
@@ -28,7 +32,12 @@ Thumbs.db
 desktop.ini
 
 # Editors temporary files
-*~
+*~*
+*.VC.opendb
+*.sdf
+*.vcxproj.user
+
 
 # Saved text files
 *.txt
+-w

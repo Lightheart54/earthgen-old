@@ -49,3 +49,9 @@ bool Edge::addState(EdgeState * edgeState)
 	}
 	return false;
 }
+
+double Edge::getLength() const
+{
+	PosVector lVec = corners.front().lock()->getPosition() - corners.back().lock()->getPosition();
+	return std::sqrt(boost::numeric::ublas::inner_prod(lVec, lVec));
+}

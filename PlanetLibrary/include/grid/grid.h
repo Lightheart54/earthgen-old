@@ -23,6 +23,9 @@ public:
 	CornerPtrList getCorners() const;
 	double getRadius() const;
 
+	double getVolume() const;
+	double getSurfaceArea() const;
+
 protected:
 	void subdivideGrid();
 	void createBaseGrid();

@@ -23,6 +23,9 @@ public:
 	TileState* getState(const std::string& stateName) const;
 	bool addState(TileState* tileState);
 
+	double getArea() const;
+	double getEnclosedVolume() const;
+
 protected:
 	friend class Grid;
 

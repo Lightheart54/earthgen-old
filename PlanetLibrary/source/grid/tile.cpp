@@ -81,3 +81,31 @@ bool Tile::addState(TileState * tileState)
 	}
 	return false;
 }
+
+double Tile::getArea() const
+{
+	EdgePtrList myEdges = getEdges();
+	double area = 0.0;
+	for (const EdgePtr& edge : myEdges)
+	{
+		PosVector vec1 = edge->getEndPoints().front()->getPosition() - position;
+		PosVector vec2 = edge->getEndPoints().back()->getPosition() - position;
+		PosVector v1xv2 = cross_product(vec1, vec2);
+		area += 0.5 * sqrt(boost::numeric::ublas::inner_prod(v1xv2, v1xv2));
+	}
+	return area;
+}
+
+double Tile::getEnclosedVolume() const
+{
+	EdgePtrList myEdges = getEdges();
+	double volume = 0.0;
+	for (const EdgePtr& edge : myEdges)
+	{
+		PosVector vec1 = edge->getEndPoints().front()->getPosition();
+		PosVector vec2 = edge->getEndPoints().back()->getPosition();
+		PosVector v1xv2 = cross_product(vec1, vec2);
+		volume += std::abs(boost::numeric::ublas::inner_prod(v1xv2, position));
+	}
+	return volume;
+}

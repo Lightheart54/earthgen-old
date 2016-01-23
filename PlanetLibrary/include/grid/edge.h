@@ -17,6 +17,7 @@ class PLANET_LIB_API Edge {
 
 		EdgeState* getState(const std::string& stateName) const;
 		bool addState(EdgeState* edgeState);
+		double getLength() const;
 
 	protected:
 		friend class Grid;

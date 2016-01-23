@@ -1,5 +1,7 @@
 #pragma warning(disable:4996)
 #include "grid/grid.h"
+#include <iostream>
+#include <boost/numeric/ublas/io.hpp>
 
 template <typename _MapType>
 typename _MapType::mapped_type mapLookup(const _MapType& map,
@@ -87,6 +89,26 @@ CornerPtrList Grid::getCorners() const
 double Grid::getRadius() const
 {
 	return radius;
+}
+
+double Grid::getVolume() const
+{
+	double totalVolume = 0.0;
+	for (const TilePtr& face : getTiles())
+	{
+		totalVolume += face->getEnclosedVolume();
+	}
+	return totalVolume;
+}
+
+double Grid::getSurfaceArea() const
+{
+	double totalSurfaceArea = 0.0;
+	for (const TilePtr& face : getTiles())
+	{
+		totalSurfaceArea += face->getArea();
+	}
+	return totalSurfaceArea;
 }
 
 void Grid::subdivideGrid()
@@ -203,30 +225,29 @@ void Grid::subdivideGrid()
 void Grid::createBaseGrid()
 {
 	//creating base dodecahedron
-	double h = (std::sqrt(5) + 1) / 2.0;
+	double h = (std::sqrt(5) - 1) / 2.0;
 	double x = 1 + h;
-	double z = 1 - h*h;
-	double crossEdgeVertexLength = std::sqrt(x*x + z*z);
-
-	double circumscribedRadius = 15 * radius / std::sqrt(75.0+30.0*std::sqrt(5));
-	double cubeVectorRatio = circumscribedRadius / std::sqrt(3);
-	double crossEdgeVertexRatio = circumscribedRadius / crossEdgeVertexLength;
-	x *= crossEdgeVertexRatio;
-	z *= crossEdgeVertexRatio;
+	double z = 1 - std::pow(h,2);
+	double crossEdgeVertexLength = 2*z;
+	double circumscribedRadius = crossEdgeVertexLength / 20 * sqrt(250 + 110*sqrt(5));
+	double circumscribingRadius = sqrt(3.0);
+	double pointMagnitudeRatio = radius / circumscribedRadius;
+	x *= pointMagnitudeRatio;
+	z *= pointMagnitudeRatio;
  
 	std::vector<PosVector> vertexPos(20,PosVector(3));
-	vertexPos[0][0] = 1 * cubeVectorRatio;
-	vertexPos[0][1] = 1 * cubeVectorRatio;
-	vertexPos[0][2] = 1 * cubeVectorRatio;
-	vertexPos[1][0] = 1 * cubeVectorRatio;
-	vertexPos[1][1] = 1 * cubeVectorRatio;
-	vertexPos[1][2] = -1 * cubeVectorRatio;
-	vertexPos[2][0] = 1 * cubeVectorRatio;
-	vertexPos[2][1] = -1 * cubeVectorRatio;
-	vertexPos[2][2] = 1 * cubeVectorRatio;
-	vertexPos[3][0] = 1 * cubeVectorRatio;
-	vertexPos[3][1] = -1 * cubeVectorRatio;
-	vertexPos[3][2] = -1 * cubeVectorRatio;
+	vertexPos[0][0] = 1 * pointMagnitudeRatio;
+	vertexPos[0][1] = 1 * pointMagnitudeRatio;
+	vertexPos[0][2] = 1 * pointMagnitudeRatio;
+	vertexPos[1][0] = 1 * pointMagnitudeRatio;
+	vertexPos[1][1] = 1 * pointMagnitudeRatio;
+	vertexPos[1][2] = -1 * pointMagnitudeRatio;
+	vertexPos[2][0] = 1 * pointMagnitudeRatio;
+	vertexPos[2][1] = -1 * pointMagnitudeRatio;
+	vertexPos[2][2] = 1 * pointMagnitudeRatio;
+	vertexPos[3][0] = 1 * pointMagnitudeRatio;
+	vertexPos[3][1] = -1 * pointMagnitudeRatio;
+	vertexPos[3][2] = -1 * pointMagnitudeRatio;
 	vertexPos[4] = -vertexPos[3];
 	vertexPos[5] = -vertexPos[2];
 	vertexPos[6] = -vertexPos[1];
@@ -255,6 +276,14 @@ void Grid::createBaseGrid()
 	vertexPos[17][2] = x;
 	vertexPos[18] = -vertexPos[17];
 	vertexPos[19] = -vertexPos[16];
+#ifdef _DEBUG
+	std::cout << "Starting Points:" << std::endl;
+	for (const PosVector& startingPoint : vertexPos)
+	{
+		std::cout << startingPoint << std::endl;
+	}
+	std::cout << std::endl;
+#endif
 
 	for (const PosVector& pVec : vertexPos)
 	{
@@ -295,10 +324,16 @@ EdgePtr Grid::createAndRegisterEdge(const CornerPtr & startPoint, const CornerPt
 	if (edges.find(newEdge->position) == edges.end())
 	{
 		edges.insert({ newEdge->getPosition(),newEdge });
+#ifdef _DEBUG
+		std::cout << "New Edge :" << startPoint->getPosition() << ", " << endPoint->getPosition() << std::endl;
+#endif
 	}
 	else
 	{
 		newEdge = edges.at(newEdge->position);
+#ifdef _DEBUG
+		std::cout << "Retrieved Edge :" << startPoint->getPosition() << ", " << endPoint->getPosition() << std::endl;
+#endif
 	}
 	return newEdge;
 }
@@ -344,6 +379,13 @@ EdgePtrList Grid::createEdgeLoop(const std::vector<PosVector>& cornerPoints)
 EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 {
 	EdgePtrList edgeloop;
+#ifdef _DEBUG
+	std::cout << "Creating Edge Loop from Points:" << std::endl;
+	for (const CornerPtr& corner: cornerPoints)
+	{
+		std::cout << corner->getPosition() << std::endl;
+	}
+#endif
 	
 	CornerPtr nextCorner = cornerPoints.front();
 	CornerPtr startCorner = cornerPoints.front();
