@@ -28,6 +28,16 @@ std::vector<typename _MapType::mapped_type> getMapValues(const _MapType& map)
 	return values;
 }
 
+template <typename _VectorType>
+void cleanWPtrs(_VectorType& wPtrList)
+{
+	auto revIt = std::remove_if(wPtrList.begin(), wPtrList.end(), [](const typename _VectorType::value_type& wptr)->bool
+	{
+		return wptr.expired();
+	});
+	wPtrList.erase(revIt, wPtrList.end());
+}
+
 Grid Grid::createGridWithTileArea(const double & _radius, const double & desiredTileArea)
 {
 	double sphereSurfaceArea = 4 * PI * _radius*_radius;
@@ -46,9 +56,11 @@ Grid Grid::createGridWithTileArea(const double & _radius, const double & desired
 Grid::Grid(const double & _radius, const unsigned int & numSubdivisions) : radius(_radius)
 {
 	createBaseGrid();
+	cleanUpMemberWPtrLists();
 	for (size_t i = 0; i < numSubdivisions; i++)
 	{
 		subdivideGrid();
+		cleanUpMemberWPtrLists();
 	}
 }
 
@@ -134,7 +146,7 @@ void Grid::subdivideGrid()
 		//add be perpendicular to the old edge
 		PosVector halfEdge = oldEnd->position - edgeCenter->position;
 		double halfEdgeLength = std::sqrt(boost::numeric::ublas::inner_prod(halfEdge, halfEdge));
-		double newHalfEdgeLength = halfEdgeLength / std::sqrt(3);
+		double newHalfEdgeLength = halfEdgeLength / 3;
 		PosVector halfEdgeUV = halfEdge / halfEdgeLength;
 		PosVector edgeCenterUV = getAveragedVectorOnSphere({ EdgePair.first }, 1);
 		PosVector newEdgeUV = cross_product(edgeCenterUV, halfEdgeUV);
@@ -174,16 +186,14 @@ void Grid::subdivideGrid()
 		CornerPtrList newTileCorners;
 		for (const CornerPtr& midPoint : connectedMidPoints)
 		{
-			CornerPtrList midPointCorners = midPoint->getCorners();
-			newTileCorners.insert(newTileCorners.end(), midPointCorners.begin(), midPointCorners.end());
+			CornerPtrList midPointConnectedPoints = midPoint->getCorners();
+			std::sort(midPointConnectedPoints.begin(), midPointConnectedPoints.end());
+			std::unique(midPointConnectedPoints.begin(), midPointConnectedPoints.end());
+			std::set_intersection(midPointConnectedPoints.begin(), midPointConnectedPoints.end(),
+				sortedNewCorners.begin(), sortedNewCorners.end(), std::back_inserter(newTileCorners));
 		}
-		std::sort(newTileCorners.begin(), newTileCorners.end());
-		std::unique(newTileCorners.begin(), newTileCorners.end());
-		CornerPtrList connectedNewCorners;
-		std::set_intersection(newTileCorners.begin(), newTileCorners.end(),
-			sortedNewCorners.begin(), sortedNewCorners.end(), std::back_inserter(connectedNewCorners));
-		assert(connectedCorners.size() == 6); //this should be a hexagon
-		createTile(connectedNewCorners);
+		assert(newTileCorners.size() == 6); //this should be a hexagon
+		createTile(newTileCorners);
 	}
 
 	//finally we need to rebuild the old tiles
@@ -197,28 +207,38 @@ void Grid::subdivideGrid()
 		for (const EdgePtr& tileEdge : tileEdges)
 		{
 			CornerPtr midPoint = mapLookup(midPoints, tileEdge->getPosition(), nullptr);
-			CornerPtrList connectedPoints = midPoint->getCorners();
-			std::sort(connectedPoints.begin(), connectedPoints.end());
-			CornerPtrList connectedNewCorners;
-			std::set_intersection(connectedPoints.begin(), connectedPoints.end(),
-				sortedNewCorners.begin(), sortedNewCorners.end(), std::back_inserter(connectedNewCorners));
-			PosVector vec1 = connectedNewCorners[0]->getPosition();
-			PosVector vec2 = connectedNewCorners[1]->getPosition();
-			vec1 -= tileCenter;
-			vec2 -= tileCenter;
-			double sqrdDist1 = boost::numeric::ublas::inner_prod(vec1, vec1);
-			double sqrdDist2 = boost::numeric::ublas::inner_prod(vec2, vec2);
-			if (sqrdDist1 < sqrdDist2)
-			{
-				newCorners.push_back(connectedNewCorners[0]);
-			}
-			else
-			{
-				newCorners.push_back(connectedNewCorners[1]);
-			}
+			getClosestNewCornerFromMidPoint(midPoint, sortedNewCorners, tileCenter, newCorners);
+
 		}
 		//finally we can make the tile
+
+		assert(newCorners.size() == 6 || newCorners.size() == 5); //this should be a hexagon or pentagon
 		createTile(newCorners);
+	}
+}
+
+void Grid::getClosestNewCornerFromMidPoint(const CornerPtr& midPoint, CornerPtrList &sortedNewCorners,
+	const PosVector& tileCenter, CornerPtrList &newCorners) const
+{
+	CornerPtrList connectedPoints = midPoint->getCorners();
+	std::sort(connectedPoints.begin(), connectedPoints.end());
+	std::unique(connectedPoints.begin(), connectedPoints.end());
+	CornerPtrList connectedNewCorners;
+	std::set_intersection(connectedPoints.begin(), connectedPoints.end(),
+		sortedNewCorners.begin(), sortedNewCorners.end(), std::back_inserter(connectedNewCorners));
+	PosVector vec1 = connectedNewCorners[0]->getPosition();
+	PosVector vec2 = connectedNewCorners[1]->getPosition();
+	vec1 -= tileCenter;
+	vec2 -= tileCenter;
+	double sqrdDist1 = boost::numeric::ublas::inner_prod(vec1, vec1);
+	double sqrdDist2 = boost::numeric::ublas::inner_prod(vec2, vec2);
+	if (sqrdDist1 < sqrdDist2)
+	{
+		newCorners.push_back(connectedNewCorners[0]);
+	}
+	else
+	{
+		newCorners.push_back(connectedNewCorners[1]);
 	}
 }
 
@@ -292,7 +312,7 @@ void Grid::createBaseGrid()
 	createTile({ vertexPos[0],	vertexPos[16],	vertexPos[2],	vertexPos[13],	vertexPos[12] });
 	createTile({ vertexPos[1],	vertexPos[12],	vertexPos[13],	vertexPos[3],	vertexPos[18] });
 	createTile({ vertexPos[0],	vertexPos[8],	vertexPos[4],	vertexPos[17],	vertexPos[16] });
-	createTile({ vertexPos[6],	vertexPos[10],	vertexPos[1],	vertexPos[16],	vertexPos[17] });
+	createTile({ vertexPos[6],	vertexPos[10],	vertexPos[2],	vertexPos[16],	vertexPos[17] });
 	createTile({ vertexPos[5],	vertexPos[14],	vertexPos[4],	vertexPos[8],	vertexPos[9] });
 	createTile({ vertexPos[1],	vertexPos[9],	vertexPos[8],	vertexPos[0],	vertexPos[12] });
 	createTile({ vertexPos[3],	vertexPos[13],	vertexPos[2],	vertexPos[10],	vertexPos[11] });
@@ -321,6 +341,9 @@ EdgePtr Grid::createEdge(const CornerPtr & startPoint, const CornerPtr & endPoin
 EdgePtr Grid::createAndRegisterEdge(const CornerPtr & startPoint, const CornerPtr & endPoint)
 {
 	EdgePtr newEdge = createEdge(startPoint, endPoint);
+#ifdef _DEBUG
+	std::cout << "Looking For edge with Pos :" << newEdge->getPosition() << " Result: ";
+#endif
 	if (edges.find(newEdge->position) == edges.end())
 	{
 		edges.insert({ newEdge->getPosition(),newEdge });
@@ -341,6 +364,7 @@ EdgePtr Grid::createAndRegisterEdge(const CornerPtr & startPoint, const CornerPt
 TilePtr Grid::createTile(const EdgePtrList& edgeLoop)
 {
 	TilePtr newTile = std::make_shared<Tile>(edgeLoop);
+	tiles.insert({ newTile->getPosition(),newTile });
 	registerTileWithEdges(newTile);
 	return newTile;
 }
@@ -389,10 +413,17 @@ EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 	
 	CornerPtr nextCorner = cornerPoints.front();
 	CornerPtr startCorner = cornerPoints.front();
+#ifdef _DEBUG
+	CornerPtrList finalPointList;
+#endif
 	do
 	{
 		//find the two other closest corners
 		PosVector currentPos = nextCorner->position;
+#ifdef _DEBUG
+        finalPointList.push_back(nextCorner);
+		std::cout << "Current Pos:" << currentPos << std::endl;
+#endif // _DEBUG
 		std::sort(cornerPoints.begin(), cornerPoints.end(),
 			[&currentPos](const CornerPtr& c1, const CornerPtr& c2)->bool
 		{
@@ -400,6 +431,15 @@ EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 			PosVector c2Pos = c2->position - currentPos;
 			return boost::numeric::ublas::inner_prod(c1Pos, c1Pos) < boost::numeric::ublas::inner_prod(c2Pos, c2Pos);
 		});
+#ifdef _DEBUG
+		std::cout << "Sort Results: " << std::endl;
+		for (const CornerPtr& corner : cornerPoints)
+		{
+			std::cout << corner->getPosition() << std::endl;
+		}
+		std::cout << std::endl;
+#endif
+
 
 		CornerPtr option1 = cornerPoints[1]; // cornerPoint[0] should now be the current point
 		CornerPtr option2 = cornerPoints[2]; // cornerPoint[0] should now be the current point
@@ -423,5 +463,30 @@ EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 
 	} while (nextCorner != startCorner);
 
+#ifdef _DEBUG
+	std::cout << "Final Edge Loop Points:" << std::endl;
+	for (const CornerPtr& corner : finalPointList)
+	{
+		std::cout << corner->getPosition() << std::endl;
+	}
+#endif
+
 	return edgeloop;
+}
+
+void Grid::cleanUpMemberWPtrLists() const
+{
+	for (const TileUMap::value_type& tilePair:tiles)
+	{
+		cleanWPtrs(tilePair.second->edges);
+	}
+	for (const EdgeUMap::value_type& edgePair : edges)
+	{
+		cleanWPtrs(edgePair.second->tiles);
+		cleanWPtrs(edgePair.second->corners);
+	}
+	for (const CornerUMap::value_type& cornerPair : corners)
+	{
+		cleanWPtrs(cornerPair.second->edges);
+	}
 }

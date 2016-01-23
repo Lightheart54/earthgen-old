@@ -28,10 +28,10 @@ TilePtrList Corner::getTiles() const
 CornerPtrList Corner::getCorners() const
 {
 	CornerPtrList connected;
-	for (const EdgeWPtr edge : edges)
+	for (const EdgeWPtr& edge : edges)
 	{
 		EdgePtr edgeptr = edge.lock();
-		CornerPtrList edgeCorners = edge.lock()->getEndPoints();
+		CornerPtrList edgeCorners = edgeptr->getEndPoints();
 		if (edgeCorners.front().get() == this)
 		{
 			connected.push_back(edgeCorners.back());

@@ -3,6 +3,8 @@
 #include "grid/corner.h"
 #include "grid/edge.h"
 #include "grid/StateBase.h"
+#include <boost/numeric/ublas/io.hpp>
+
 
 Tile::Tile(const EdgePtrList& tileEdges)
 {
@@ -12,6 +14,11 @@ Tile::Tile(const EdgePtrList& tileEdges)
 	std::transform(tileEdges.begin(), tileEdges.end(), std::back_inserter(edgePos),
 		[](const EdgePtr& cPtr)->PosVector { return cPtr->getPosition(); });
 	position = getAveragedVector(edgePos);
+#ifdef _DEBUG
+	std::cout << "Created Tile at: " << position << std::endl;
+	std::cout << "With Area: " << getArea() << std::endl;
+	std::cout << "And Partial Volume: " << getEnclosedVolume() << std::endl;
+#endif
 }
 
 Tile::~Tile()
@@ -105,7 +112,7 @@ double Tile::getEnclosedVolume() const
 		PosVector vec1 = edge->getEndPoints().front()->getPosition();
 		PosVector vec2 = edge->getEndPoints().back()->getPosition();
 		PosVector v1xv2 = cross_product(vec1, vec2);
-		volume += std::abs(boost::numeric::ublas::inner_prod(v1xv2, position));
+		volume += std::abs(boost::numeric::ublas::inner_prod(v1xv2, position))/6.0;
 	}
 	return volume;
 }

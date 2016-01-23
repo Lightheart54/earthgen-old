@@ -27,8 +27,13 @@ public:
 	double getSurfaceArea() const;
 
 protected:
-	void subdivideGrid();
 	void createBaseGrid();
+	void subdivideGrid();
+	void getClosestNewCornerFromMidPoint(const CornerPtr& midPoint, CornerPtrList &sortedNewCorners,
+		const PosVector& tileCenter, CornerPtrList &newCorners) const;
+	void cleanUpMemberWPtrLists() const;
+
+
 	CornerPtr createCorner(const PosVector& pos);
 	EdgePtr createEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
 	EdgePtr createAndRegisterEdge(const CornerPtr& startPoint, const CornerPtr& endPoint);
