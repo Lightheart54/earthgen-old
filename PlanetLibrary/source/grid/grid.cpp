@@ -147,7 +147,8 @@ void Grid::subdivideGrid()
 		{
 			PosVector edgeCenter = tileEdge->getPosition();
 			PosVector edgeCenterUV = getUnitVector(edgeCenter);
-			PosVector edgeEnd = tileEdge->getEndPoints().front()->getPosition();
+			PosVector edgestart = tileEdge->getEndPoints().front()->getPosition();
+			PosVector edgeEnd = tileEdge->getEndPoints().back()->getPosition();
 			PosVector cenMid = edgeCenter - tileCenter;
 			double magCenMid = std::sqrt(inner_prod(cenMid, cenMid));
 			PosVector cenMidUV = cenMid/magCenMid;
@@ -155,14 +156,22 @@ void Grid::subdivideGrid()
 			PosVector cenEndUV = getUnitVector(cenEnd);
 			//the new half edge length must preserve the interior angle of tile for the edge
 			//and also result in a corner that is the half length is the distance between the
-			//line through the edge center and the origin and the new corner
+			//splitting plane along the miter resulting between the tiles that are going to be
+			//created for either corner
 			double sineHalfTileInteriorAngle = std::sqrt(1 - std::pow(inner_prod(cenMidUV, cenEndUV), 2));
-			double cosineHalfGridInteriorAngle = inner_prod(tileCenterUV, edgeCenterUV);
-			double newHalfEdgeLength = magCenMid / (sineHalfTileInteriorAngle + 1.0 / cosineHalfGridInteriorAngle);
-			double projectedLength = newHalfEdgeLength / cosineHalfGridInteriorAngle;
-
+			double halfEdgeAngleCos = std::abs(inner_prod(tileCenterUV, edgeCenterUV));
+			double newHalfEdgeLength = (magCenMid* sineHalfTileInteriorAngle) / (1 + sineHalfTileInteriorAngle / halfEdgeAngleCos);
+			double projectedLength = newHalfEdgeLength / halfEdgeAngleCos;
 			PosVector newCornerLoc = edgeCenter + -1 * cenMidUV*projectedLength;//cenMidUV points from the tile center to the edgeCenter
 			CornerPtr newCorner = createCorner(newCornerLoc);
+
+#ifdef _DEBUG
+			PosVector newTileOuterRadiusVec = newCornerLoc - tileCenter;
+			double newTileOuterRadius = std::sqrt(inner_prod(newTileOuterRadiusVec, newTileOuterRadiusVec));
+			double calculatedSin = newHalfEdgeLength/ newTileOuterRadius;
+			assert(std::round((calculatedSin - sineHalfTileInteriorAngle) * 10000) == 0.0);
+#endif // _DEBUG
+
 			newCorners.push_back(newCorner);
 			for (const CornerPtr& oldCorner : tileEdge->getEndPoints())
 			{
