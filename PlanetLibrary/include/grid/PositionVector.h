@@ -14,6 +14,7 @@ PLANET_LIB_API PosVector cross_product(const PosVector& lhs, const PosVector& rh
 
 PLANET_LIB_API PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double& radius);
 PLANET_LIB_API PosVector getAveragedVector(const std::vector<PosVector>& vectors);
+PLANET_LIB_API PosVector getUnitVector(const PosVector& vector);
 
 template <int percision = 2>
 struct VecHash

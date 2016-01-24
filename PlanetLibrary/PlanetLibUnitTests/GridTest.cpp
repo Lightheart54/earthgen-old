@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(SubdivideOnceTest)
 	BOOST_CHECK(testGrid.getEdges().size() == 90);
 	BOOST_CHECK(testGrid.getCorners().size() == 60);
 	
-	double sideLength = 0.299351984;
+	double sideLength = 2 * 0.350515589;
 
 	double expectedApproximateSurfaceArea = std::pow(sideLength, 2) * (30.0*std::sqrt(3)+15.0*std::sqrt(1+2.0/std::sqrt(5)));
 	expectedApproximateSurfaceArea = std::round(expectedApproximateSurfaceArea * 10000) / 10000.0;

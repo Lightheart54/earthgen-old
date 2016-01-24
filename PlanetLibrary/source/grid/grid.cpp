@@ -3,6 +3,8 @@
 #include <iostream>
 #include <boost/numeric/ublas/io.hpp>
 
+using boost::numeric::ublas::inner_prod;
+
 template <typename _MapType>
 typename _MapType::mapped_type mapLookup(const _MapType& map,
 	const typename _MapType::key_type& key,
@@ -132,88 +134,56 @@ void Grid::subdivideGrid()
 	edges.clear();
 	corners.clear();
 
-	//first we take every edge we have and subdivide it to create our new corners
-	//we need to store these so that they stay alive until the end of this function
-	CornerUMap midPoints;
-	EdgePtrList linkingEdges;
-	for (const EdgeUMap::value_type& EdgePair : oldEdges)
-	{
-		CornerPtr edgeCenter = std::make_shared<Corner>(EdgePair.first);
-		midPoints.insert({ EdgePair.first,edgeCenter });
-		CornerPtr oldStart = EdgePair.second->getEndPoints().front();
-		CornerPtr oldEnd = EdgePair.second->getEndPoints().back();
-		//the new edges must have a length of the old edge length /sqrt(3)
-		//add be perpendicular to the old edge
-		PosVector halfEdge = oldEnd->position - edgeCenter->position;
-		double halfEdgeLength = std::sqrt(boost::numeric::ublas::inner_prod(halfEdge, halfEdge));
-		double newHalfEdgeLength = halfEdgeLength / 3;
-		PosVector halfEdgeUV = halfEdge / halfEdgeLength;
-		PosVector edgeCenterUV = getAveragedVectorOnSphere({ EdgePair.first }, 1);
-		PosVector newEdgeUV = cross_product(edgeCenterUV, halfEdgeUV);
-		PosVector newStartPos = EdgePair.first - newHalfEdgeLength * newEdgeUV;
-		PosVector newEndPos = EdgePair.first + newHalfEdgeLength * newEdgeUV;
-
-		//this should work out to be greater than then length of the radius of the inscribed sphere
-		assert(radius < std::sqrt(boost::numeric::ublas::inner_prod(newStartPos, newStartPos)));
-
-		//create the new corners
-		CornerPtr newStart = createCorner(newStartPos);
-		CornerPtr newEnd = createCorner(newEndPos);
-
-		//now we're going to create linking edges for the purposes of discovering these edges later
-		linkingEdges.push_back(createEdge(oldStart, edgeCenter));
-		linkingEdges.push_back(createEdge(edgeCenter, oldEnd));
-		linkingEdges.push_back(createEdge(newStart, edgeCenter));
-		linkingEdges.push_back(createEdge(edgeCenter, newEnd));
-	}
-	//sort the linking edges, midPoints, and newCorners so that we can use them for set intersections
-	std::sort(linkingEdges.begin(), linkingEdges.end());
-	CornerPtrList sortedMidPoints = getMapValues(midPoints);
-	std::sort(sortedMidPoints.begin(), sortedMidPoints.end());
-	CornerPtrList sortedNewCorners = getMapValues(corners);
-	std::sort(sortedNewCorners.begin(), sortedNewCorners.end());
-
-	//now we have all of the new corners we need to construct our new faces
-	//let's begin with the old corners, these are the easy ones
-	for (const CornerUMap::value_type& cornerPair : oldCorners)
-	{
-		CornerPtr oldCorner = cornerPair.second;
-		CornerPtrList connectedCorners = oldCorner->getCorners();
-		std::sort(connectedCorners.begin(), connectedCorners.end());
-		CornerPtrList connectedMidPoints;
-		std::set_intersection(connectedCorners.begin(), connectedCorners.end(),
-			sortedMidPoints.begin(), sortedMidPoints.end(), std::back_inserter(connectedMidPoints));
-		CornerPtrList newTileCorners;
-		for (const CornerPtr& midPoint : connectedMidPoints)
-		{
-			CornerPtrList midPointConnectedPoints = midPoint->getCorners();
-			std::sort(midPointConnectedPoints.begin(), midPointConnectedPoints.end());
-			std::unique(midPointConnectedPoints.begin(), midPointConnectedPoints.end());
-			std::set_intersection(midPointConnectedPoints.begin(), midPointConnectedPoints.end(),
-				sortedNewCorners.begin(), sortedNewCorners.end(), std::back_inserter(newTileCorners));
-		}
-		assert(newTileCorners.size() == 6); //this should be a hexagon
-		createTile(newTileCorners);
-	}
-
-	//finally we need to rebuild the old tiles
+	//first subdivide the old tiles, while we're at it keep track of the new corners that
+	//will go with each of the old corners to make our new tiles
+	std::unordered_map<CornerPtr, CornerPtrList> newTileCornerMap;
 	for (const TileUMap::value_type& tilePair : oldTiles)
 	{
-		//we need the new corner attached to each old edge's midpoint
-		//that is closest the the tile center
 		PosVector tileCenter = tilePair.first;
+		PosVector tileCenterUV = getUnitVector(tileCenter);
 		EdgePtrList tileEdges = tilePair.second->getEdges();
 		CornerPtrList newCorners;
 		for (const EdgePtr& tileEdge : tileEdges)
 		{
-			CornerPtr midPoint = mapLookup(midPoints, tileEdge->getPosition(), nullptr);
-			getClosestNewCornerFromMidPoint(midPoint, sortedNewCorners, tileCenter, newCorners);
+			PosVector edgeCenter = tileEdge->getPosition();
+			PosVector edgeCenterUV = getUnitVector(edgeCenter);
+			PosVector edgeEnd = tileEdge->getEndPoints().front()->getPosition();
+			PosVector cenMid = edgeCenter - tileCenter;
+			double magCenMid = std::sqrt(inner_prod(cenMid, cenMid));
+			PosVector cenMidUV = cenMid/magCenMid;
+			PosVector cenEnd = edgeEnd - tileCenter;
+			PosVector cenEndUV = getUnitVector(cenEnd);
+			//the new half edge length must preserve the interior angle of tile for the edge
+			//and also result in a corner that is the half length is the distance between the
+			//line through the edge center and the origin and the new corner
+			double sineHalfTileInteriorAngle = std::sqrt(1 - std::pow(inner_prod(cenMidUV, cenEndUV), 2));
+			double cosineHalfGridInteriorAngle = inner_prod(tileCenterUV, edgeCenterUV);
+			double newHalfEdgeLength = magCenMid / (sineHalfTileInteriorAngle + 1.0 / cosineHalfGridInteriorAngle);
+			double projectedLength = newHalfEdgeLength / cosineHalfGridInteriorAngle;
 
+			PosVector newCornerLoc = edgeCenter + -1 * cenMidUV*projectedLength;//cenMidUV points from the tile center to the edgeCenter
+			CornerPtr newCorner = createCorner(newCornerLoc);
+			newCorners.push_back(newCorner);
+			for (const CornerPtr& oldCorner : tileEdge->getEndPoints())
+			{
+				if (newTileCornerMap.find(oldCorner) != newTileCornerMap.end())
+				{
+					newTileCornerMap[oldCorner].push_back(newCorner);
+				}
+				else
+				{
+					newTileCornerMap.insert({ oldCorner,{newCorner} });
+				}
+			}
 		}
-		//finally we can make the tile
-
-		assert(newCorners.size() == 6 || newCorners.size() == 5); //this should be a hexagon or pentagon
+		//remake our old tile with its new corners
 		createTile(newCorners);
+	}
+
+	//now make our new tiles
+	for (const std::unordered_map<CornerPtr, CornerPtrList>::value_type& newTileCornerPair:newTileCornerMap)
+	{
+		createTile(newTileCornerPair.second);
 	}
 }
 
@@ -230,8 +200,8 @@ void Grid::getClosestNewCornerFromMidPoint(const CornerPtr& midPoint, CornerPtrL
 	PosVector vec2 = connectedNewCorners[1]->getPosition();
 	vec1 -= tileCenter;
 	vec2 -= tileCenter;
-	double sqrdDist1 = boost::numeric::ublas::inner_prod(vec1, vec1);
-	double sqrdDist2 = boost::numeric::ublas::inner_prod(vec2, vec2);
+	double sqrdDist1 = inner_prod(vec1, vec1);
+	double sqrdDist2 = inner_prod(vec2, vec2);
 	if (sqrdDist1 < sqrdDist2)
 	{
 		newCorners.push_back(connectedNewCorners[0]);
@@ -429,7 +399,7 @@ EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 		{
 			PosVector c1Pos = c1->position - currentPos;
 			PosVector c2Pos = c2->position - currentPos;
-			return boost::numeric::ublas::inner_prod(c1Pos, c1Pos) < boost::numeric::ublas::inner_prod(c2Pos, c2Pos);
+			return inner_prod(c1Pos, c1Pos) < inner_prod(c2Pos, c2Pos);
 		});
 #ifdef _DEBUG
 		std::cout << "Sort Results: " << std::endl;
@@ -446,7 +416,7 @@ EdgePtrList Grid::createEdgeLoop(CornerPtrList cornerPoints)
 		PosVector c1Pos = option1->position - currentPos;
 		PosVector c2Pos = option2->position - currentPos;
 		PosVector c1Xc2 = cross_product(c1Pos, c2Pos);
-		double orderIndicator = boost::numeric::ublas::inner_prod(c1Xc2, currentPos);
+		double orderIndicator = inner_prod(c1Xc2, currentPos);
 		//if the orderIndicator is negative, it indicates that c1Xc2 is in the opposite
 		//direction of the position vector for the current point, which we don't want
 		//therefore option2 is the next point, otherwise option1 is the correct choice

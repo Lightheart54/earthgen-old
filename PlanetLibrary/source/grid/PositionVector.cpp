@@ -1,6 +1,8 @@
 #pragma warning(disable:4996)
 #include "grid/PositionVector.h"
 
+using boost::numeric::ublas::inner_prod;
+
 PLANET_LIB_API PosVector cross_product(const PosVector & lhs, const PosVector & rhs)
 {
 	PosVector result(3);
@@ -13,7 +15,7 @@ PLANET_LIB_API PosVector cross_product(const PosVector & lhs, const PosVector & 
 PLANET_LIB_API PosVector getAveragedVectorOnSphere(const std::vector<PosVector>& vectors, const double & radius)
 {
 	PosVector averageVec = getAveragedVector(vectors);
-	double averageMag = std::sqrt(boost::numeric::ublas::inner_prod(averageVec, averageVec));
+	double averageMag = std::sqrt(inner_prod(averageVec, averageVec));
 	averageVec *= radius / averageMag;
 	return averageVec;
 }
@@ -27,4 +29,9 @@ PLANET_LIB_API PosVector getAveragedVector(const std::vector<PosVector>& vectors
 	}
 	averageVec /= vectors.size();
 	return averageVec;
+}
+
+PLANET_LIB_API PosVector getUnitVector(const PosVector& vector)
+{
+	return vector / std::sqrt(inner_prod(vector, vector));
 }
